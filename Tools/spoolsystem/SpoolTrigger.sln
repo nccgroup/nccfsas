@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29709.97
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SpoolTrigger", "SpoolTrigger\SpoolTrigger.vcxproj", "{80A14EC7-7999-4828-8C48-13CDA7853E29}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{80A14EC7-7999-4828-8C48-13CDA7853E29}.Debug|x64.ActiveCfg = Debug|x64
+		{80A14EC7-7999-4828-8C48-13CDA7853E29}.Debug|x64.Build.0 = Debug|x64
+		{80A14EC7-7999-4828-8C48-13CDA7853E29}.Debug|x86.ActiveCfg = Debug|Win32
+		{80A14EC7-7999-4828-8C48-13CDA7853E29}.Debug|x86.Build.0 = Debug|Win32
+		{80A14EC7-7999-4828-8C48-13CDA7853E29}.Release|x64.ActiveCfg = Release|x64
+		{80A14EC7-7999-4828-8C48-13CDA7853E29}.Release|x64.Build.0 = Release|x64
+		{80A14EC7-7999-4828-8C48-13CDA7853E29}.Release|x86.ActiveCfg = Release|Win32
+		{80A14EC7-7999-4828-8C48-13CDA7853E29}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8623D52A-9314-4C3F-9B7D-538D9B813931}
+	EndGlobalSection
+EndGlobal

@@ -2,7 +2,7 @@
 
 This is an exploit for CVE-2020-1472, a.k.a. Zerologon. This tool exploits a cryptographic vulnerability in Netlogon to achieve authentication bypass. Ultimately, this allows for an attacker to reset the machine account of a target Domain Controller, leading to Domain Admin compromise.
 
-The vulnerability was discovered by Tom Tervoort of Secura BV, and was addressesd by Microsoft in September 2020. You can read more about the vulnerability in [their excellent whitepaper](https://www.secura.com/blog/zero-logon).
+The vulnerability was discovered by Tom Tervoort of Secura BV, and was addressesd by Microsoft on August 11th 2020. You can read more about the vulnerability in [their excellent whitepaper](https://www.secura.com/blog/zero-logon).
 
 Although other exploits exist, this tool is aimed at working with Cobalt Strike's `execute-assembly` functionality. Therefore it is written in C# using functions from `netapi32.dll`. The nice thing here is that due to the structures being zero by default, we do not need to mess with any packets and can use the APIs provided by Microsoft cleanly (relatively ;).
 
@@ -37,7 +37,6 @@ Once the machine account password is reset, you can use `pth` to impersonate the
 ## Detection
 
 * A [sample PCAP](https://github.com/sbousseaden/PCAP-ATTACK/blob/master/Lateral%20Movement/CVE-2020-1472_Zerologon_RPC_NetLogon_NullChallenge_SecChan_6_from_nonDC_to_DC.pcapng) of a Zerologon attempt is provided by @sbousseaden.
-* For machines updated since August 11th 2020, [Event ID 5829 was added](https://support.microsoft.com/en-gb/help/4557222/how-to-manage-the-changes-in-netlogon-secure-channel-connections-assoc) to indicate whenver a vulnerable Netlogon secure channel is allowed.
 * Adam Swan of SOC Prime provides a [Sigma rule](https://socprime.com/blog/zerologon-attack-detection-cve-2020-1472/) which can be used to detect Zerologon attempts.
 * For detecting default `pth` usage in Cobalt Strike, look for command lines containing `/c echo` and `\\.\pipe\` together. Default Cobalt Strike also uses 11 hex characters for the echo argument, and 6 hex characters for the pipe name. This requires manually patching and is not easily configurable by the operator.
 * To detect DCSync usage, look for event ID 4662 containing the GUID `{1131f6ad-9c07-11d1-f79f-00c04fc2dcd2}`, which is the `DS-Replication-Get-Changes-All` extended right required for replication. Any replication from a non Domain Controller is suspicious. @James_inthe_box also provides [this Snort](https://gist.github.com/silence-is-best/25ae0929c277642e86ecf592598a3254) rule.

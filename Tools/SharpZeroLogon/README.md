@@ -51,6 +51,7 @@ Note that the patch is designed to work on x64 clients only.
 ## Detection
 
 * A [sample PCAP](https://github.com/sbousseaden/PCAP-ATTACK/blob/master/Lateral%20Movement/CVE-2020-1472_Zerologon_RPC_NetLogon_NullChallenge_SecChan_6_from_nonDC_to_DC.pcapng) of a Zerologon attempt is provided by @sbousseaden.
+* Successful exploitation resulting in a password change will show as event ID 4742, Password last set change, performed by Anonymous Logon.
 * Adam Swan of SOC Prime provides a [Sigma rule](https://socprime.com/blog/zerologon-attack-detection-cve-2020-1472/) which can be used to detect Zerologon attempts.
 * For detecting default `pth` usage in Cobalt Strike, look for command lines containing `/c echo` and `\\.\pipe\` together. Default Cobalt Strike also uses 11 hex characters for the echo argument, and 6 hex characters for the pipe name. This requires manually patching and is not easily configurable by the operator.
 * To detect DCSync usage, look for event ID 4662 containing the GUID `{1131f6ad-9c07-11d1-f79f-00c04fc2dcd2}`, which is the `DS-Replication-Get-Changes-All` extended right required for replication. Any replication from a non Domain Controller is suspicious. @James_inthe_box also provides [this Snort](https://gist.github.com/silence-is-best/25ae0929c277642e86ecf592598a3254) rule.

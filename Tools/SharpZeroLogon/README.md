@@ -10,7 +10,7 @@ Although other exploits exist, this tool is aimed at working with Cobalt Strike'
 
 ## Checking if the server is vulnerable
 
-To run the exploit, from a domain joined machine run the `SharpZeroLogon.exe` binary, providing the FQDN of the Domain Controller.
+To run the exploit, from a domain joined machine (see method below for non domain-joined) run the `SharpZeroLogon.exe` binary, providing the FQDN of the Domain Controller.
 
 Running it with only one argument will test whether the target Domain Controller is vulnerable to CVE-2020-1472.
 
@@ -29,10 +29,24 @@ Firstly, it is **very important** to note that resetting the Domain Controller m
 To reset the machine account, run the following command (specifying your DC FQDN):
 
 ```
-execute-assembly SharpZeroLogon.exe win-dc01.vulncorp.local true
+execute-assembly SharpZeroLogon.exe win-dc01.vulncorp.local -reset
 ```
 
 Once the machine account password is reset, you can use `pth` to impersonate the machine account and perform a DCSync.
+
+## Testing from a non Domain-joined machine
+
+By default the `netapi32.dll` functions use RPC over SMB named pipe (ncacn_np), which requires an authenticated session (i.e. a domain-joined client). Benjamin Delpy (@gentilkiwi) found a way round this by patching `logoncli.dll` with a single byte patch that forces RPC over TCP/IP (ncacn_ip_tcp) instead, which he has implemented in Mimikatz. This patch allows the exploit to work from a non domain-joined client as well.
+
+To run the exploit from a non domain-joined context, use the `-patch` flag, which will force the client to use RPC over TCP/IP.
+
+For example:
+
+```
+execute-assembly SharpZeroLogon.exe win-dc01.vulncorp.local -patch
+```
+
+Note that the patch is designed to work on x64 clients only.
 
 ## Detection
 
@@ -46,3 +60,5 @@ Once the machine account password is reset, you can use `pth` to impersonate the
 * https://www.secura.com/blog/zero-logon
 * https://github.com/dirkjanm/CVE-2020-1472
 * https://twitter.com/gentilkiwi/status/1305659499991183361
+* https://twitter.com/gentilkiwi/status/1305975783781994498
+* https://github.com/gentilkiwi/mimikatz/commit/880c15994c4955d232f83cd2f73e5b6b1de165e7

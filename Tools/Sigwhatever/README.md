@@ -71,3 +71,5 @@ Operations:
   Usage: SigWhatever.exe SHOWACLS
 
   NOTE: With the signature option, if --backdoor-all is not specified then the tool will attempt to get the current signature from Outlook - this may cause a popup for the user if their AV is out of date.
+  
+Authors: David Cash, Rich Warren, Julian Storr 

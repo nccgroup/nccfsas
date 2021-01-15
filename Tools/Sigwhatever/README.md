@@ -1,5 +1,16 @@
 Sigwhatever
-For automated exploitation of netntlm hash capture via image tags in emails.
+For automated exploitation of netntlm hash capture via image tags in emails signatures. This targets Outlook specifically and will insert a 1x1px image into an existing signature block, or create a new signature as required. A listener is then started to capture authentication attempts that happen as a result of sent emails being viewed by other users.
+
+The tool borrows code from the Seatbelt and Inveigh projects - features are:
+
+* Queries the firewall for suitable ports to listen on (Uses some seatbelt code)
+* Cross references HttpQueryServiceConfiguration for any usable URL ACLs
+* TCP/HTTP server and hash capture (Uses Inveigh code)
+* Signature Detection (to modify the appropriate registry settings and signatures)
+* Modification of Signature
+* Feature to send mail to specific group (e.g. domain admins)
+* Option to create encrypted logs on disk
+* Cleanup (Reverts changes in signature settings and existing signature)
 
 ==========
 
@@ -18,46 +29,45 @@ Bear in mind that even running jobkill on the .net job does not seem to kill the
 ==========
 
 
-Usage instructions - note that <port> refers to the port that the HTTP server will run on.
-
-        AUTO: Just do everything for me - backdoor the signature and start the listener on this box.
-
-                Usage: sigwhatever.exe AUTO
+Usage: SigWhatever.exe [OPTIONS]+ operation
 
 
-        CHECKTRUST: Check whether the trust zone settings - if the domain isn't in there then this probably won't work
+Options:
+  -p, --port=VALUE           TCP Port.
+  -l, --log=VALUE            Log file path.
+  -g, --group=VALUE          Target Active Directory group.
+  -f, --force                Force HTTP server start.
+      --ba, --backdoor-all   Backdoor all signatures.
+  -c, --challenge=VALUE      NTLM Challenge (in hex).
+  -u, --url-prefix=VALUE     URL Prefix. e.g. /MDEServer/test
+  -h, --help                 Show this message and exit.
 
-                Usage: sigwhatever.exe CHECKTRUST
+Operations:
+  AUTO: Just do everything for me - backdoor the signature and start the listener on this box.
+  Usage: SigWhatever.exe AUTO
 
+  CHECKTRUST: Check whether the trust zone settings - if the domain isn't in there then this probably won't work
+  Usage: SigWhatever.exe CHECKTRUST
 
-        CHECKFW: Check whether the host based firewall is on and whether there's an exception for the chosen port
+  CHECKFW: Check whether the host based firewall is on and whether there's an exception for the chosen port
+  Usage: SigWhatever.exe CHECKFW -p <port>
 
-                Usage: sigwhatever.exe CHECKFW <port>
+  SIGNATURE: hijack the current user's signature, or add a new one via registry changes
+  Usage: SigWhatever.exe SIGNATURE -p <port> -l <logfile> -u <url prefix> --backdoor-all --force
 
+  SIGNOLISTEN: hijack the current user's signature, or add a new one via registry changes
+  Usage: SigWhatever.exe SIGNOLISTEN -s <server> -p <port> -l <logfile> --backdoor-all>
 
-        SIGNATURE: hijack the current user's signature, or add a new one via registry changes
+  CLEANUP: Remove any modifications to the registry or htm signature files
+  Usage: SigWhatever.exe CLEANUP
 
-                Usage: sigwhatever.exe SIGNATURE <port> <logfile> <backdoorall> <force>
+  EMAILADMINS: Enumerate email addresses from an AD group and send them a 'blank' email with the payload.
+  Usage: SigWhatever.exe EMAILADMINS -g <Active Directory group> -p <port> -l <logfile> --force
 
+  LISTENONLY: Just start the listener - make sure it's on the same port
+  Usage: SigWhatever.exe LISTENONLY -p <port> -l <logfile>
 
-        SIGNOLISTEN: hijack the current user's signature, or add a new one via registry changes
+  SHOWACLS: List all URL Reservation ACLs with User, Everyone or Authenticated Users permissions.
+  Usage: SigWhatever.exe SHOWACLS
 
-                Usage: sigwhatever.exe SIGNOLISTEN <server> <port> <logfile> <backdoorall>
-
-
-        CLEANUP: Remove any modifications to the registry or htm signature files
-
-                Usage: sigwhatever.exe CLEANUP
-
-
-        EMAILADMINS: Enumerate email addresses from an AD group and send them a 'blank' email with the payload.
-
-                Usage: sigwhatever.exe EMAILADMINS <Active Directory group> <port> <logfile> <force>
-
-
-        LISTENONLY: Just start the listener - make sure it's on the same port
-
-                Usage: sigwhatever.exe LISTENONLY <port> <logfile>
-
-
-NOTE: With the signature option, if backdoorall is not specified then the tool will attempt to get the current signature from Outlook - this may cause a popup for the user if their AV is out of date.
+  NOTE: With the signature option, if --backdoor-all is not specified then the tool will attempt to get the current signature from Outlook - this may cause a popup for the user if their AV is out of date.

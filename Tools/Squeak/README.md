@@ -1,5 +1,7 @@
 # Squeak
 
+Connect to an MSSQL instance (as DBA/SA) and execute shellcode via a .net DLL.
+
 Generate a standalone .net executable with hard coded arguments to leverage SQL CLR integration.
 
 1. Open the Squeak GUI

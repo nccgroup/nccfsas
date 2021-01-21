@@ -1,0 +1,74 @@
+﻿<Page x:Class="Squeak.Home"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:Squeak"
+      mc:Ignorable="d" d:DesignWidth="800"
+      Title="Home" Height="375" KeepAlive="true">
+
+    <Grid Margin="10,0" Height="375" VerticalAlignment="Top">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100"/>
+            <ColumnDefinition />
+            <ColumnDefinition Width="40" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="50.5"/>
+
+
+        </Grid.RowDefinitions>
+        <Border Grid.Column="0" Grid.Row="0" Height="Auto" Padding="5">
+            <Label VerticalAlignment="Top" Foreground="Black" RenderTransformOrigin="0.5,0.5" Grid.Column="1" Margin="1,-3,-150,0">
+                <Label.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="0.051"/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </Label.RenderTransform> MSSQL Connection
+            </Label>
+        </Border>
+        <TextBlock Grid.Row="1" Grid.Column="0">Raw Bin</TextBlock>
+        <TextBox Name="txtRaw" Grid.Row="1" Grid.Column="1" Text="{Binding txtRaw}"/>
+
+        <TextBlock Grid.Row="2" Grid.Column="0">Server</TextBlock>
+        <TextBox Name="txtServer" Grid.Row="2" Grid.Column="1" Text="{Binding txtServer}"/>
+
+        <TextBlock Grid.Row="3" Grid.Column="0">Port</TextBlock>
+        <TextBox Name="txtPort" Grid.Row="3" Grid.Column="1" Text="{Binding txtPort}"/>
+
+        <TextBlock Grid.Row="4" Grid.Column="0">Database</TextBlock>
+        <TextBox Name="txtDatabase" Grid.Row="4" Grid.Column="1" Text="{Binding txtDatabase}"/>
+
+        <TextBlock Grid.Row="5" Grid.Column="0">Username</TextBlock>
+        <TextBox Name="txtUsername" Grid.Row="5" Grid.Column="1" Text="{Binding txtUsername}"/>
+
+        <TextBlock Grid.Row="6" Grid.Column="0">Password</TextBlock>
+        <TextBox Name="txtPassword" Grid.Row="6" Grid.Column="1" Text="{Binding txtPassword}"/>
+
+        <TextBlock Grid.Row="11" Grid.Column="0" Margin="0,10,0,46" Grid.RowSpan="2">Debug Output</TextBlock>
+        <RichTextBox Name="rtbDebug" Grid.Row="10" Grid.Column="1" Margin="0,9,0,51" VerticalScrollBarVisibility="Visible" Grid.RowSpan="2" Height="150" />
+
+
+        <CheckBox Name="cbWinauth" Grid.Row="8" Grid.Column="1" Checked="cbWinauth_CheckedChanged" Unchecked="cbWinauth_CheckedChanged">Authenticate as current Windows identity</CheckBox>
+
+        <!-- Buttons -->
+        <Button Grid.Row="9" Margin="0,10,10,1" Width="90" HorizontalAlignment="Center" Click="CodeEdit_Click">Edit CLR Code</Button>
+        <Button Grid.Column="1" Grid.Row="9" Margin="0,11,0,2" Width="125" HorizontalAlignment="Right" Click="Generate_Click">Generate</Button>
+        <Button Grid.Column="2" Grid.Row="1" Click="btnFileBrowse_Click">...</Button>
+        <Label Content="Edit code that is compiled to make the CLR DLL added as an ASSEMBLY" Grid.Column="1" HorizontalAlignment="Left" Margin="10,8,0,0" Grid.Row="9" VerticalAlignment="Top" Width="417"/>
+    </Grid>
+</Page>

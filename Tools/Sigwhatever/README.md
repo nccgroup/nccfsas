@@ -55,11 +55,11 @@ Bear in mind that even running jobkill on the .net job does not seem to kill the
 - **CHECKFW**: Check whether the host based firewall is on and whether there's an exception for the chosen port.    
   _Usage_: `SigWhatever.exe CHECKFW -p <port>`
   
--  **SIGNATURE**: hijack the current user's signature, or add a new one via registry changes.    
+-  **SIGNATURE**: Hijack the current user's signature, or add a new one via registry changes.    
   _Usage_: `SigWhatever.exe SIGNATURE -p <port> -l <logfile> -u <url prefix> --backdoor-all --force`    
-  _Note_: With the signature option, if --backdoor-all is not specified then the tool will attempt to get the current signature from Outlook - this may cause a popup for the user if their AV is out of date.
+  _Note_: If `--backdoor-all` is not specified then the tool will attempt to get the current signature from Outlook - this may cause a popup for the user if their AV is outdated.
 
-- **SIGNOLISTEN**: hijack the current user's signature, or add a new one via registry changes.    
+- **SIGNOLISTEN**: Hijack the current user's signature, or add a new one via registry changes.    
   _Usage_: `SigWhatever.exe SIGNOLISTEN -s <server> -p <port> -l <logfile> --backdoor-all>`
 
 - **CLEANUP**: Remove any modifications to the registry or htm signature files.    

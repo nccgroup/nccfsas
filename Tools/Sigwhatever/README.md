@@ -46,33 +46,33 @@ Bear in mind that even running jobkill on the .net job does not seem to kill the
 
 ### OPERATIONS:
 
-- AUTO: Just do everything for me - backdoor the signature and start the listener on this box.    
-  Usage: `SigWhatever.exe AUTO`
+- **AUTO**: Just do everything for me - backdoor the signature and start the listener on this box.    
+  _Usage_: `SigWhatever.exe AUTO`
 
-- CHECKTRUST: Check whether the trust zone settings - if the domain isn't in there then this probably won't work.    
-  Usage: `SigWhatever.exe CHECKTRUST`
+- **CHECKTRUST**: Check whether the trust zone settings - if the domain isn't in there then this probably won't work.    
+  _Usage_: `SigWhatever.exe CHECKTRUST`
 
-- CHECKFW: Check whether the host based firewall is on and whether there's an exception for the chosen port.    
-  Usage: `SigWhatever.exe CHECKFW -p <port>`
+- **CHECKFW**: Check whether the host based firewall is on and whether there's an exception for the chosen port.    
+  _Usage_: `SigWhatever.exe CHECKFW -p <port>`
   
--  SIGNATURE: hijack the current user's signature, or add a new one via registry changes.    
-  Usage: `SigWhatever.exe SIGNATURE -p <port> -l <logfile> -u <url prefix> --backdoor-all --force`    
-  Note: With the signature option, if --backdoor-all is not specified then the tool will attempt to get the current signature from Outlook - this may cause a popup for the user if their AV is out of date.
+-  **SIGNATURE**: hijack the current user's signature, or add a new one via registry changes.    
+  _Usage_: `SigWhatever.exe SIGNATURE -p <port> -l <logfile> -u <url prefix> --backdoor-all --force`    
+  _Note_: With the signature option, if --backdoor-all is not specified then the tool will attempt to get the current signature from Outlook - this may cause a popup for the user if their AV is out of date.
 
-- SIGNOLISTEN: hijack the current user's signature, or add a new one via registry changes.    
-  Usage: `SigWhatever.exe SIGNOLISTEN -s <server> -p <port> -l <logfile> --backdoor-all>`
+- **SIGNOLISTEN**: hijack the current user's signature, or add a new one via registry changes.    
+  _Usage_: `SigWhatever.exe SIGNOLISTEN -s <server> -p <port> -l <logfile> --backdoor-all>`
 
-- CLEANUP: Remove any modifications to the registry or htm signature files.    
-  Usage: `SigWhatever.exe CLEANUP`
+- **CLEANUP**: Remove any modifications to the registry or htm signature files.    
+  _Usage_: `SigWhatever.exe CLEANUP`
 
-- EMAILADMINS: Enumerate email addresses from an AD group and send them a 'blank' email with the payload.    
-  Usage: `SigWhatever.exe EMAILADMINS -g <Active Directory group> -p <port> -l <logfile> --force`
+- **EMAILADMINS**: Enumerate email addresses from an AD group and send them a 'blank' email with the payload.    
+  _Usage_: `SigWhatever.exe EMAILADMINS -g <Active Directory group> -p <port> -l <logfile> --force`
 
-- LISTENONLY: Just start the listener - make sure it's on the same port.    
-  Usage: `SigWhatever.exe LISTENONLY -p <port> -l <logfile>`
+- **LISTENONLY**: Just start the listener - make sure it's on the same port.    
+  _Usage_: `SigWhatever.exe LISTENONLY -p <port> -l <logfile>`
 
-- SHOWACLS: List all URL Reservation ACLs with User, Everyone or Authenticated Users permissions.    
-  Usage: `SigWhatever.exe SHOWACLS`
+- **SHOWACLS**: List all URL Reservation ACLs with User, Everyone or Authenticated Users permissions.    
+  _Usage_: `SigWhatever.exe SHOWACLS`
 
   
 ## Authors: 

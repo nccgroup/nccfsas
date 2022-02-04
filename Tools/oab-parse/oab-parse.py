@@ -1,5 +1,6 @@
 # Parses Offline Address Book files (i.e. %localappdata%\Microsoft\Outlook\"Offline Address Books"\<UUID>\udetails.oab) according to
 # https://docs.microsoft.com/en-us/openspecs/exchange_server_protocols/ms-oxoab/
+import codecs
 import csv
 import json
 from base64 import b64encode
@@ -146,18 +147,21 @@ def read_PtypBoolean_factory(instance):
 
 
 def read_PtypString_factory(instance):
-    charset = instance.charset
+    decoder = codecs.getincrementaldecoder(instance.charset)(errors='strict')
 
     def read_PtypString(stream, n=None):
         if n is None or n == 1:
             result = ""
+            decoder.reset()
+
             while True:
                 readbyte = bytes(stream.read(bytes, 1))
 
                 if readbyte == b'\x00':
+                    result += decoder.decode(bytes(), final=True)
                     return result
                 else:
-                    result += readbyte.decode(charset)
+                    result += decoder.decode(readbyte)
         else:
             return [read_PtypString(stream) for _ in range(n)]
 
@@ -209,9 +213,9 @@ def parse_OAB_PROP_TABLE(input):
         elif data_type_raw == 0x0102:
             data_type = PtypBinary()
         elif data_type_raw == 0x1E:
-            data_type = PtypString("UTF-8")
+            data_type = PtypString("UTF-8")  # Spec says "externally defined" encoding
         elif data_type_raw == 0x1F:
-            data_type = PtypString("latin-1")
+            data_type = PtypString("UTF-8")  # Spec says UTF-16LE but evidence suggests otherwise
         else:
             print(f"Unexpected data type: {data_type_raw}")
             data_type = None

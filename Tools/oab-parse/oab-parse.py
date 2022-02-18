@@ -273,7 +273,10 @@ def parse_Uncompressed_OAB_v4_Full_Details(input):
     # Parse Address Book object records
     with progressbar(range(records)) as bar:
         for i in bar:
-            result["Records"].append(parse_OAB_V4_REC(input, record_bit_size, record_fields_defs))
+            try:
+                result["Records"].append(parse_OAB_V4_REC(input, record_bit_size, record_fields_defs))
+            except:
+                print(f"[!] Error parsing record {i}")
 
     return result
 

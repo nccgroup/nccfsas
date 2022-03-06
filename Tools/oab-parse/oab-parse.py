@@ -3,7 +3,9 @@
 import codecs
 import csv
 import json
+import platform
 from base64 import b64encode
+from ctypes import *
 from uuid import UUID
 
 import bitstream
@@ -329,6 +331,50 @@ def post_process_pair(name, value):
     return value
 
 
+def decompress_lzx(input_filename, output_filename):
+    """
+    Decompress the LZX DELTA format of offline address books served up by exchange servers.
+    Relies on libmspack as there are no pure-python implementation of this obscure compression
+    algorithm.
+
+    :param input_file: The compressed input filename
+    :return: A temporary file handle to the decompressed output
+    """
+    mspack = None
+    try:
+        if platform.architecture() == ('64bit', 'WindowsPE'):
+            mspack = CDLL(".\mspack.x64.dll")
+        elif platform.architecture() == ('32bit', 'WindowsPE'):
+            mspack = CDLL(".\mspack.x86.dll")
+        else:
+            mspack = CDLL("libmspack.so")   # Requires libmspack built for *nix - e.g. `sudo apt-get install libmspack0`
+    except:
+        exit("Unable to locate libmspack for your operating system. Can you install it, e.g. sudo apt-get install libmspack0")
+
+
+    class msoab_decompressor (Structure):
+        pass  # the struct is self referencing, so need to declare the class THEN set _fields_
+
+
+    msoab_decompressor._fields_ = [
+                ('decompress', CFUNCTYPE(c_int, POINTER(msoab_decompressor), c_char_p, c_char_p)),
+                ('decompress_incremental', CFUNCTYPE(c_int, POINTER(msoab_decompressor), c_char_p, c_char_p, c_char_p)),
+                ('set_param', CFUNCTYPE(c_int, POINTER(msoab_decompressor), c_int, c_int))
+            ]
+
+    version = mspack.mspack_version(14)  #  14 = MSPACK_VER_MSOABD
+    assert (version > 1)
+
+    mspack.mspack_create_oab_decompressor.restype = POINTER(msoab_decompressor)
+    decompressor = mspack.mspack_create_oab_decompressor(None)
+
+    err = decompressor.contents.decompress(decompressor,
+                                           input_filename.encode("us-ascii"),
+                                           output_filename.encode("us-ascii"))
+
+    mspack.mspack_destroy_oab_decompressor(decompressor)
+
+
 @click.command()
 @click.argument('infile', type=click.File('rb'))
 @click.argument('outfile', type=click.File('w', encoding="UTF-8"))
@@ -339,7 +385,7 @@ def main(infile, outfile, format):
     Parses Offline Address Books into text output.
 
     \b
-    INFILE: Path to the udetails.oab file
+    INFILE: Path to the udetails.oab or full .lzx file
     OUTFILE: The file to write to
 
     \f
@@ -347,9 +393,17 @@ def main(infile, outfile, format):
     :param outfile: The file to write to
     :param format: Choice of output format, e.g. CSV
     """
-    input = BitStream(infile.read())
-    data = parse_Uncompressed_OAB_v4_Full_Details(input)
+    with tempfile.TemporaryDirectory(prefix="oab-parse") as output_dir:
+        if infile.name.endswith(".lzx"):
+            print(f"Decompressing LZX file...")
+            workingfile = os.path.join(output_dir, "udetails.oab")
+            decompress_lzx(infile.name, workingfile)
+            with open(workingfile, 'rb') as workingfilehandle:
+                input = BitStream(workingfilehandle.read())
+        else:
+            input = BitStream(infile.read())
 
+    data = parse_Uncompressed_OAB_v4_Full_Details(input)
     post_process(data)
 
     if format == "CSV":

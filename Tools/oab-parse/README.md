@@ -5,7 +5,7 @@ Purpose
 -------
 A utility for dumping an organisation's Global Address List (GAL) from Outlook's Offline Address Book (OAB).
 The tool will parse the `udetails.oab` file found in `%localappdata%\Microsoft\Outlook\"Offline Address Books"\<UUID>` 
-and produce a CSV or JSON file for further processing.
+or full .lzx files obtained from exchange, and produce a CSV or JSON file for further processing.
 
 The GAL includes phone numbers, job descriptions, distribution list sizes and additional user data.
 This can be of use on Red Team jobs after establishing an initial foothold to identify
@@ -20,6 +20,7 @@ Installation
 * Create a virtual environment to keep the dependencies separate from other apps: `\Python39\python -m venv .venv`
 * Activate the virtual environment: `.venv\Scripts\activate` or `source .venv/bin/activate` on *nix
 * Install the dependencies: `pip install -r requirements.txt`
+* On non-Windows systems, libmspack must also be installed for .lzx file support, e.g. on Kali: `sudo apt-get install libmspack0`
 
 Usage
 -----
@@ -30,7 +31,7 @@ Usage: oab-parse.py [OPTIONS] INFILE OUTFILE
 
   Parses Offline Address Books into text output.
 
-  INFILE: Path to the udetails.oab file
+  INFILE: Path to the udetails.oab or full .lzx file
   OUTFILE: The file to write to
 
 Options:

@@ -3,9 +3,9 @@ OAB-Parse
 
 Purpose
 -------
-A utility for dumping an organisation's Global Address List (GAL) from Outlook's Offline Address Book (OAB).
-The tool will parse the `udetails.oab` file found in `%localappdata%\Microsoft\Outlook\"Offline Address Books"\<UUID>` 
-or full .lzx files obtained from exchange, and produce a CSV or JSON file for further processing.
+A utility for dumping an organisation's Global Address List (GAL) from its Offline Address Book (OAB).
+The tool will parse Outlook's `udetails.oab` file found in `%localappdata%\Microsoft\Outlook\"Offline Address Books"\<UUID>` 
+or full .lzx files obtained from Microsoft Exchange, and produce a CSV or JSON file for further processing.
 
 The GAL includes phone numbers, job descriptions, distribution list sizes and additional user data.
 This can be of use on Red Team jobs after establishing an initial foothold to identify

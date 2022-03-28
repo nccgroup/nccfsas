@@ -2,6 +2,7 @@
 # https://docs.microsoft.com/en-us/openspecs/exchange_server_protocols/ms-oxoab/
 import codecs
 import csv
+import html
 import json
 import platform
 from base64 import b64encode
@@ -10,9 +11,10 @@ from uuid import UUID
 
 import bitstream
 import click
+import tabulate
+from bitstream import *
 from click import progressbar
 from numpy import *
-from bitstream import *
 
 # Attributes found in the header record
 RG_HDR_ATTS = {
@@ -378,7 +380,7 @@ def decompress_lzx(input_filename, output_filename):
 @click.command()
 @click.argument('infile', type=click.File('rb'))
 @click.argument('outfile', type=click.File('w', encoding="UTF-8"))
-@click.option('--format', default="CSV", type=click.Choice(['CSV', 'JSON'], case_sensitive=False), show_default=True,
+@click.option('--format', default="CSV", type=click.Choice(['CSV', 'HTML', 'JSON'], case_sensitive=False), show_default=True,
               help="Output file format")
 def main(infile, outfile, format):
     """
@@ -418,6 +420,34 @@ def main(infile, outfile, format):
         writer.writeheader()
         for row in data["Records"]:
             writer.writerow(row)
+    elif format == "HTML":
+        outfile.write("""<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<style>
+.tableFixHead          { overflow: auto; height: 100px; }
+.tableFixHead thead th { position: sticky; top: 0; z-index: 1; }
+table  { border-collapse: collapse; width: 100%; }
+th, td { padding: 8px 16px; }
+th     { background:#eee; }
+table, td, th {
+  border: 1px solid;
+}
+</style>
+</head>
+<body class="tableFixHead">""")
+        for row in data["Records"]:
+            for field in row.keys():
+                if field == "ThumbnailPhoto":
+                    row["ThumbnailPhoto"] = f"<img src='data:image/jpeg;base64,{row['ThumbnailPhoto']}'/>"
+                elif field == "UserX509Certificate":
+                    row["UserX509Certificate"] = f"<a download=\"user.crt\" href=\"data:application/octet-stream;base64,{row['UserX509Certificate']}\">Download</a>"
+                elif field == "AddressBookX509Certificate":
+                    row["AddressBookX509Certificate"] = f"<a download=\"addressbook.crt\" href=\"data:application/octet-stream;base64,{row['AddressBookX509Certificate']}\">Download</a>"
+                else:
+                    row[field] = html.escape(str(row[field]))
+        outfile.write(tabulate.tabulate(data["Records"], tablefmt="unsafehtml", numalign=None, stralign=None, headers="keys"))
+        outfile.write("""</body></html>""")
     elif format == "JSON":
         json.dump(data, outfile)
 

